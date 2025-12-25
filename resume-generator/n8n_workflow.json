@@ -1,0 +1,376 @@
+{
+    "name": "AI Resume Generator (Integrated)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "generate-resume",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "webhook-node",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                128
+            ],
+            "webhookId": "generate-resume"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "value": "={{ $('Webhook').item.json.body.apiKey }}"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "contents",
+                            "value": "={{ [ { \"parts\": [ { \"text\": \"You are an expert technical recruiter.\\n\\nJob Description:\\n\" + $('Webhook').item.json.body.jobDescription + \"\\n\\nTask: Analyze this job description. Output a JSON object with fields: title, company, requirements (array), keywords (array of strings), tone, hidden_signals.\" } ] } ] }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "cddad41e-6391-4875-a1d7-dce15128cc32",
+            "name": "Analyze Job (HTTP)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 3,
+            "position": [
+                480,
+                128
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "value": "={{ $('Webhook').item.json.body.apiKey }}"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "contents",
+                            "value": "={{ [ { \"parts\": [ { \"text\": \"You are a professional resume writer.\\n\\nJob Analysis:\\n\" + JSON.stringify($('Analyze Job (HTTP)').item.json.candidates[0].content.parts[0].text) + \"\\n\\nMaster Resume:\\n\" + $('Webhook').item.json.body.currentResume + \"\\n\\nProfile Notes:\\n\" + $('Webhook').item.json.body.profileNotes + \"\\n\\nTASK: Write a 1-PAGE professional COVER LETTER.\\n\\nCRITICAL FORMATTING RULES:\\n1. PLAIN TEXT ONLY. Do not use markdown (**bold** etc).\\n2. Single-spaced, compact layout.\\n3. Do not use code blocks (```).\\n4. Fit strictly to one page.\" } ] } ] }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "f062feed-c681-4bea-ba16-15bca988039b",
+            "name": "Generate Content (HTTP)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 3,
+            "position": [
+                700,
+                280
+            ]
+        },
+        {
+            "parameters": {
+                "folderId": "1lozvrme5ZLM5yp3PQnHDxjsQlumW9fAv",
+                "title": "My Cover Letter"
+            },
+            "id": "e51df402-e9af-439a-bb4c-4d7f5dc18939",
+            "name": "Create a document",
+            "type": "n8n-nodes-base.googleDocs",
+            "typeVersion": 2,
+            "position": [
+                920,
+                280
+            ],
+            "credentials": {
+                "googleDocsOAuth2Api": {
+                    "id": "VEySPlrXpEEbhLQH",
+                    "name": "Google Docs account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "documentURL": "={{ $json.id }}",
+                "actionsUi": {
+                    "actionFields": [
+                        {
+                            "action": "insert",
+                            "text": "={{ $('Generate Content (HTTP)').item.json.candidates[0].content.parts[0].text }}"
+                        }
+                    ]
+                }
+            },
+            "id": "c51dfb79-b58e-4a58-beff-6e56dfee3896",
+            "name": "Update a document",
+            "type": "n8n-nodes-base.googleDocs",
+            "typeVersion": 2,
+            "position": [
+                1140,
+                280
+            ],
+            "credentials": {
+                "googleDocsOAuth2Api": {
+                    "id": "VEySPlrXpEEbhLQH",
+                    "name": "Google Docs account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "value": "={{ $('Webhook').item.json.body.apiKey }}"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "contents",
+                            "value": "={{\n  [\n    {\n      \"parts\": [\n        {\n          \"text\": \"You are a professional resume writer.\\n\\nJob Analysis:\\n\" + JSON.stringify($('Analyze Job (HTTP)').item.json.candidates[0].content.parts[0].text) + \"\\n\\nMaster Resume:\\n\" + $('Webhook').item.json.body.currentResume + \"\\n\\nProfile Notes:\\n\" + $('Webhook').item.json.body.profileNotes + \"\\n\\nTask: Rewrite the Master Resume to perfectly align with the Job Analysis.\\n\\nIMPORTANT: Output ONLY the resume content. No markdown formatting (no bolding with **, no headers with ##). Just plain text.\\n\\nREQUIRED FORMAT:\\n\\nContact Info: Name, Phone, Email, LinkedIn.\\nEducation: Degree, University, Graduation Date, GPA (if 3.0+), relevant coursework/honors.\\nProfessional Summary: Tailored statement highlighting goals, key skills, and fit for the role.\\nSkills:\\n- Technical: (Software, Languages)\\n- Soft Skills: (Communication, Teamwork)\\nExperience: Internships, part-time jobs, volunteer work, projects (reverse-chronological).\\nProjects/Activities/Certifications: Relevant additions.\\n\\nKeep it concise (1 page).\"\n        }\n      ]\n    }\n  ]\n}}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "7553e373-001a-440f-8e2f-693d7a643c3f",
+            "name": "Generate Content (HTTP)1",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 3,
+            "position": [
+                700,
+                -20
+            ]
+        },
+        {
+            "parameters": {
+                "folderId": "1lozvrme5ZLM5yp3PQnHDxjsQlumW9fAv",
+                "title": "My Resume"
+            },
+            "id": "d67321f7-1ae5-4e8e-a2ee-483086ac4d34",
+            "name": "Create a document1",
+            "type": "n8n-nodes-base.googleDocs",
+            "typeVersion": 2,
+            "position": [
+                920,
+                -20
+            ],
+            "credentials": {
+                "googleDocsOAuth2Api": {
+                    "id": "VEySPlrXpEEbhLQH",
+                    "name": "Google Docs account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "documentURL": "={{ $json.id }}",
+                "actionsUi": {
+                    "actionFields": [
+                        {
+                            "action": "insert",
+                            "text": "={{ $('Generate Content (HTTP)1').item.json.candidates[0].content.parts[0].text }}"
+                        }
+                    ]
+                }
+            },
+            "id": "d545232d-dcf8-4a6a-9b9f-0ca5ee73abb3",
+            "name": "Update a document1",
+            "type": "n8n-nodes-base.googleDocs",
+            "typeVersion": 2,
+            "position": [
+                1140,
+                -20
+            ],
+            "credentials": {
+                "googleDocsOAuth2Api": {
+                    "id": "VEySPlrXpEEbhLQH",
+                    "name": "Google Docs account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "mode": "wait"
+            },
+            "id": "merge-node",
+            "name": "Merge",
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 2,
+            "position": [
+                1380,
+                130
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ { \"resumeUrl\": \"https://docs.google.com/document/d/\" + $('Create a document1').item.json.id + \"/edit\", \"coverLetterUrl\": \"https://docs.google.com/document/d/\" + $('Create a document').item.json.id + \"/edit\" } }}",
+                "options": {}
+            },
+            "id": "respond-webhook-node",
+            "name": "Respond to Webhook",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                1580,
+                130
+            ]
+        },
+        {
+            "parameters": {
+                "amount": 5,
+                "unit": "seconds"
+            },
+            "id": "wait-node",
+            "name": "Wait",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                600,
+                130
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Analyze Job (HTTP)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Analyze Job (HTTP)": {
+            "main": [
+                [
+                    {
+                        "node": "Wait",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Wait": {
+            "main": [
+                [
+                    {
+                        "node": "Generate Content (HTTP)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Generate Content (HTTP)1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generate Content (HTTP)": {
+            "main": [
+                [
+                    {
+                        "node": "Create a document",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create a document": {
+            "main": [
+                [
+                    {
+                        "node": "Update a document",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Update a document": {
+            "main": [
+                [
+                    {
+                        "node": "Merge",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Generate Content (HTTP)1": {
+            "main": [
+                [
+                    {
+                        "node": "Create a document1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create a document1": {
+            "main": [
+                [
+                    {
+                        "node": "Update a document1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Update a document1": {
+            "main": [
+                [
+                    {
+                        "node": "Merge",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Merge": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
