@@ -23,7 +23,7 @@
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/tailordoc.git
+git clone https://github.com/Gabby-vays/tailor-doc.git
 cd tailordoc
 ```
 
