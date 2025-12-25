@@ -81,7 +81,7 @@ export default function Home() {
           <div className="inline-block p-4 bg-gradient-to-br from-indigo-500 to-fuchsia-500 rounded-2xl shadow-2xl shadow-indigo-500/20 mb-4">
             <Sparkles className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 to-fuchsia-200">ResumeForge</h1>
+          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 to-fuchsia-200">TailorDoc</h1>
           <p className="text-slate-400 max-w-md mx-auto">Sign in to access your Google Drive for automatic resume generation.</p>
           <button
             onClick={() => signIn("google")}
@@ -111,7 +111,7 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 to-fuchsia-200">
-                ResumeForge
+                TailorDoc
               </h1>
               <p className="text-xs text-slate-500 font-medium tracking-wide uppercase">AI-Powered Tailoring (n8n Edition)</p>
             </div>
