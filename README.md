@@ -1,5 +1,13 @@
 # TailorDoc: AI Resume & Cover Letter Generator
 
+
+![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)
+![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)
+![n8n](https://img.shields.io/badge/Powered%20By-n8n-ff6b6b?style=flat-square&logo=n8n)
+![Gemini](https://img.shields.io/badge/AI-Google%20Gemini%202.0-4285F4?style=flat-square&logo=google-gemini)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)
+![Tailwind](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=flat-square&logo=tailwind-css)
+
 **TailorDoc** is an intelligent career automation tool that rewrites your resume and creates tailored cover letters for specific job applications using Google Gemini 2.0.
 
 ![TailorDoc Preview](resume-generator/public/tailordoc-cover.png)
