@@ -2,7 +2,7 @@
 
 **TailorDoc** is an intelligent career automation tool that rewrites your resume and creates tailored cover letters for specific job applications using Google Gemini 2.0.
 
-![TailorDoc UI](https://via.placeholder.com/800x400?text=TailorDoc+UI+Preview)
+![TailorDoc Preview](resume-generator/public/tailordoc-cover.png)
 
 ## 🚀 Features
 
